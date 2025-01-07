@@ -1,74 +1,80 @@
+import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:cameratest/core/display_camera.dart';
 import 'package:cameratest/feature/camera/controller/camera_controller.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
 
-class CameraExample extends StatelessWidget {
+// class CameraExample extends StatelessWidget {
+class CameraExample extends GetView<CameraControllerX>{
   const CameraExample({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:  AppBar(title: Text('Camera Example')),
-      body: GetBuilder<CameraControllerX>(
-        init: CameraControllerX(), // Initialize the CameraControllerX
-        builder: (controller) {
-          return Obx(() {
-            if (!controller.isCameraInitialized.value) {
-              return const Center(child: CircularProgressIndicator());
-            }
+    // final cameraController = Get.put(CameraControllerX()); // Instantiate controller
 
-            // Camera preview is ready after initialization
-            return CameraPreview(controller.controller);
-          });
-        },
-      ),
-      floatingActionButton: Column(
+    return Scaffold(
+      appBar: AppBar(title: const Text('Camera Example')),
+      body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Floating action button to take a picture
-          FloatingActionButton(
-            child: const Icon(Icons.camera_alt),
-            onPressed: () async {
-              try {
-                final controller = Get.find<CameraControllerX>(); // Get the controller
-
-                // Ensure that the camera is initialized before taking a picture
-                await controller.initializeCamera();
-
-                // Get temporary directory and save path for the picture
-                final directory = await getTemporaryDirectory();
-                final path = join(directory.path, '${DateTime.now()}.png');
-
-                // Capture the picture
-                XFile picture = await controller.takePicture();
-
-                // Save the picture to the desired path
-                await picture.saveTo(path);
-
-                // Use Get.to() for navigation to display the captured picture
-                Get.to(() => DisplayPictureScreen(imagePath: path));
-              } catch (e) {
-                if (kDebugMode) {
-                  print('Error: $e'); // Log the error if something goes wrong
-                }
+          // CircleAvatar to display captured photo
+          Obx(() {
+            return CircleAvatar(
+              radius: 50,
+              backgroundImage: controller.capturedPhotoPath.value.isNotEmpty
+                  ? FileImage(File(controller.capturedPhotoPath.value))
+                  : null,
+              child: controller.capturedPhotoPath.value.isEmpty
+                  ? const Icon(Icons.person, size: 50)
+                  : null,
+            );
+          }),
+          const SizedBox(height: 20),
+          Expanded(
+            child: Obx(() {
+              if (!controller.isCameraInitialized.value) {
+                return const Center(child: CircularProgressIndicator());
               }
-            },
-          ),
-          const SizedBox(height: 10),
-          // Floating action button to toggle between front and rear camera
-          FloatingActionButton(
-            child: const Icon(Icons.switch_camera),
-            onPressed: () {
-              final controller = Get.find<CameraControllerX>();
-              controller.toggleCamera(); // Switch between front and rear camera
-            },
+              return CameraPreview(controller.imagePreviewController);
+            }),
           ),
         ],
+      ),
+      floatingActionButton: Align(
+        alignment: Alignment.bottomCenter,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              heroTag: 'capture',
+              child: const Icon(Icons.camera_alt),
+              onPressed: () async {
+                try {
+                  // Capture and save the picture
+                  final directory = await getTemporaryDirectory();
+                  final path = join(directory.path, '${DateTime.now()}.png');
+
+                  await controller.takePicture();
+
+                  if (controller.capturedPhotoPath.value.isNotEmpty) {
+                    debugPrint('Photo saved at ${controller.capturedPhotoPath.value}');
+                    debugPrint('Photo saved at ====> $path');
+                  }
+                } catch (e) {
+                  debugPrint('Error capturing photo: $e');
+                }
+              },
+            ),
+            const SizedBox(width: 16),
+            FloatingActionButton(
+              heroTag: 'switch',
+              child: const Icon(Icons.switch_camera),
+              onPressed: () => controller.toggleCamera(),
+            ),
+          ],
+        ),
       ),
     );
   }

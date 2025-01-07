@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    ndkVersion = "27.0.12077973"
+//    ndkVersion = "27.0.12077973"
     namespace = "com.example.cameratest"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -34,7 +34,7 @@ android {
         versionName = flutter.versionName
         multiDexEnabled true
     }
-
+    ndkVersion "27.0.12077973"
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
