@@ -8,7 +8,7 @@ import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 class CameraExample extends StatelessWidget {
-  const CameraExample({Key? key}) : super(key: key);
+  const CameraExample({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class CameraExample extends StatelessWidget {
         },
       ),
       floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Floating action button to take a picture
           FloatingActionButton(
