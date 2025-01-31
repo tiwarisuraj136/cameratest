@@ -78,9 +78,6 @@ class CameraExample extends StatelessWidget {
             ),
           ),
         )
-
-
-
     );
   }
 }
